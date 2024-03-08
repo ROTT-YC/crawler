@@ -55,6 +55,23 @@ def increase_db(dict_data, id_num, cate_num, wm_num):
         img_title = dict_title.translate(str.maketrans("", "", """\/:*?!,.'"<>|""")).strip()
         img_path = str("/root/news" + img_title + ".jpg")
         package.load_pic(dict_img, img_path) # Download pic
+        package.draw_icon(img_path, wm_num) # Watermark
+
+        article_con = package.genereate_content(dict_title, dict_content, "gpt-4-1106-preview")
+        title = article_con[0].replace(",", "").replace("/", "").strip()
+        date_time = package.currentime()
+
+        if dict_title and dict_content and dict_img:
+            status_num = "Completed"
+        else: status_num = "Undone"
+
+        try:
+            cur.executemany(sql,[[title, article_con[1], img_path, status_num, date_time, id_num, cate_num, wm_num, dict_link]])
+            db.commit()
+            print()
+            if cate_num == "": pass
+        except Exception as e:
+            print(e)
 
 if __name__ == "__main__":
     print(setting.today_date)

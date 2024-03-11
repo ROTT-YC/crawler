@@ -1,7 +1,7 @@
 # pip install bs4, Pillow, requests, openai, pymysql
 from bs4 import BeautifulSoup
 from PIL import Image
-import requests, os, openai, pymysql, package, time
+import requests, os, openai, pymysql, package, time, threading, concurrent.futures
 import setting
 
 # Globals
@@ -48,7 +48,7 @@ def get_webdata(link):
     return dict_data
 
 def increase_db(dict_data, id_num, cate_num, wm_num):
-    sql = "INSERT INTO datasheet(title, content, image_path, status, post_time, pf_id, pf_category, watermark, origin_url) VALUES ()"
+    sql = "INSERT INTO datasheet(title, content, image_path, status, post_time, pf_id, pf_category, watermark, origin_url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
     
     for l in (range(len(dict_data))):
         dict_title, dict_content, dict_img, dict_link = dict_data[l]
@@ -68,11 +68,16 @@ def increase_db(dict_data, id_num, cate_num, wm_num):
         try:
             cur.executemany(sql,[[title, article_con[1], img_path, status_num, date_time, id_num, cate_num, wm_num, dict_link]])
             db.commit()
-            print()
+            print("Database increase sucessful!")
             if cate_num == "": pass
         except Exception as e:
             print(e)
 
 if __name__ == "__main__":
-    print(setting.today_date)
     
+    print(setting.today_date)
+
+    start_time = time.time()
+    link = ""
+    increase_db(get_webdata(link), "1", "1", "1")
+    print("--- %s seconds ---" % (time.time() - start_time))
